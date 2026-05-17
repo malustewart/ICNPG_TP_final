@@ -90,7 +90,7 @@ def solve_gain(S0, I, p: SOAParameters):
     f_wrapper = lambda G: f(G,S0,I,p)
 
     # Solve f(G)=0
-    G_max = params.G_inflection(S0, I)
+    G_max = p.G_inflection(S0, I)
     solution = root_scalar(
         f_wrapper,
         bracket=[1e-1, G_max],
@@ -104,12 +104,15 @@ def solve_gain(S0, I, p: SOAParameters):
 
     return solution.root
 
-def calc_curve(S0s: np.ndarray, I: float, params : SOAParameters):
+def calc_gain_curve(S0s: np.ndarray, I: float, params : SOAParameters):
     """
     Cálculo de G a partir de parámetros del SOA para un conjunto de potencias de entrada S0:
     """
     Gs = [solve_gain(S0, I, params) for S0 in S0s]
     return np.array(Gs)
+
+def calc_gain_matrix(S0s: np.ndarray, Is: np.ndarray, params: SOAParameters):
+    return np.array([[solve_gain(S0, I, params) for S0 in S0s] for I in Is])
 
 
 # ============================================================
@@ -118,7 +121,7 @@ def calc_curve(S0s: np.ndarray, I: float, params : SOAParameters):
 
 if __name__ == "__main__":
 
-    I=0.15              # 150 mA
+    I=0.300              # [A]
 
     # Reasonable-ish SOA parameters
     params = SOAParameters(
@@ -155,11 +158,11 @@ if __name__ == "__main__":
     print("================================================")
 
 
-    Pins = np.linspace(0.5e-3, 3.5e-3, 12)
+    Pins = np.linspace(2.2e-3, 2.4e-3, 12)
     S0s = [params.get_S0_from_P(P, WAVELENGTH) for P in Pins]
 
     try:
-        Gs = calc_curve(S0s, I, params)
+        Gs = calc_gain_curve(S0s, I, params)
 
         for P, s, g in zip(Pins, S0s, Gs):
             print(f"P = {P:.2} S0 = {s:.3e}   G = {g:.6e}")
@@ -178,3 +181,25 @@ if __name__ == "__main__":
     except Exception as e:
         print("\nCurve computation failed:")
         print(e)
+
+
+    # Pin in Watts
+    # I in mA
+    def plot_gain_vs_Pin(gain, Pin, I):
+        plt.figure()
+        plt.semilogy(Pin*1e3, gain, linestyle='', marker='.')
+        plt.xlabel("P in [mW]")
+        plt.ylabel("Gain (linear)")
+        plt.title(f"Gain vs. P_in - I_soa: {I}mA")
+
+    # Pout in Watts
+    # I in mA
+    def plot_gain_vs_Pout(gain, Pout, I):
+        plt.figure()
+        plt.scatter(Pout*1e3, gain)
+        plt.xlabel("P out [mW]")
+        plt.ylabel("Gain (linear)")
+        plt.title(f"Gain vs. P_out - I_soa: {I}mA")
+
+    plot_gain_vs_Pin(Gs, Pins, I*1e3)
+    plt.show()

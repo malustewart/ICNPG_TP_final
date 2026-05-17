@@ -2,3 +2,4 @@
 measurement/*
 *settings.json
 *.ipynb
+__pycache__/*
