@@ -55,7 +55,7 @@ def gain_dB(p_out, p_in):
 # I in mA
 def plot_gain_vs_Pin(gain, Pin, I):
     plt.figure()
-    plt.semilogy(Pin*10e3, gain, linestyle='', marker='.')
+    plt.semilogy(Pin*1e3, gain, linestyle='', marker='.')
     plt.xlabel("P in [mW]")
     plt.ylabel("Gain (linear)")
     plt.title(f"Gain vs. P_in - I_soa: {I}mA")
@@ -64,7 +64,7 @@ def plot_gain_vs_Pin(gain, Pin, I):
 # I in mA
 def plot_gain_vs_Pout(gain, Pout, I):
     plt.figure()
-    plt.scatter(Pout*10e3, gain)
+    plt.scatter(Pout*1e3, gain)
     plt.xlabel("P out [mW]")
     plt.ylabel("Gain (linear)")
     plt.title(f"Gain vs. P_out - I_soa: {I}mA")
